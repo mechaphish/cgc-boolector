@@ -21722,18 +21722,6 @@ static int lglocslook (LGL * lgl) {
   return res;
 }
 
-/*------------------------------------------------------------------------*/
-
-static int lglforklit (int ilit) {
-  int idx = abs (ilit), res;
-  assert (idx > 1);
-  res = idx - 1;
-  if (ilit < 0) res = -res;
-  return res;
-}
-
-/*------------------------------------------------------------------------*/
-
 static int lglsweeping (LGL * lgl) {
   if (!lglsmallirr (lgl)) return 0;
   if (!lgl->opts->sweep.val) return 0;
@@ -25169,92 +25157,6 @@ void lgltravall (LGL * lgl, void * state, void (*trav)(void *, int)) {
   lglutrav (lgl, &travstate, lgltravallu);
   lgletrav (lgl, &travstate, lgltravalle);
   lglctrav (lgl, state, trav);
-}
-
-#ifndef NDEBUG
-
-void lgldump (LGL * lgl) {
-  int idx, sign, lit, blit, tag, red, other, other2, glue;
-  const int * p, * w, * eow, * c, * top;
-  Stk * lir;
-  HTS * hts;
-  for (idx = 2; idx < lgl->nvars; idx++)
-    for (sign = -1; sign <= 1; sign += 2) {
-      lit = sign * idx;
-      hts = lglhts (lgl, lit);
-      w = lglhts2wchs (lgl, hts);
-      eow = w + hts->count;
-      for (p = w; p < eow; p++) {
-	blit = *p;
-	tag = blit & MASKCS;
-	red = blit & REDCS;
-	if (tag == TRNCS || tag == LRGCS) p++;
-	if (tag == BINCS) {
-	  other = blit >> RMSHFT;
-	  if (abs (other) < idx) continue;
-	  other2 = 0;
-	} else if (tag == TRNCS) {
-	  other = blit >> RMSHFT;
-	  if (abs (other) < idx) continue;
-	  other2 = *p;
-	  if (abs (other2) < idx) continue;
-	} else continue;
-	fprintf (lgl->out, "%s %d %d", red ? "red" : "irr", lit, other);
-	if (tag == TRNCS) fprintf (lgl->out, " %d", other2);
-	fprintf (lgl->out, "\n");
-      }
-    }
-  top = lgl->irr.top;
-  for (c = lgl->irr.start; c < top; c = p + 1) {
-    p = c;
-    if (*p >= NOTALIT) continue;
-    fprintf (lgl->out, "irr");
-    while (*p) fprintf (lgl->out, " %d", *p++);
-    fprintf (lgl->out, "\n");
-  }
-  for (glue = 0; glue < MAXGLUE; glue++) {
-    lir = lgl->red + glue;
-    top = lir->top;
-    for (c = lir->start; c < top; c = p + 1) {
-      p = c;
-      if (*p >= NOTALIT) continue;
-      fprintf (lgl->out, "glue%d", glue);
-      while (*p) fprintf (lgl->out, " %d", *p++);
-      fprintf (lgl->out, "\n");
-    }
-  }
-}
-
-#endif
-
-static void lglforkadd (void * ptr, int lit) {
-  lgladd (ptr, lit ? lglforklit (lit) : 0);
-}
-
-LGL * lglfork (LGL * parent) {
-  LGL * child;
-  {
-    LGL * lgl = parent;
-    REQINIT ();
-    ABORTIF (!lglmtstk (&parent->eassume), "can not fork under assumptions");
-    ABORTIF (parent->forked == INT_MAX, "parent forked too often");
-  }
-  if (parent->level > 0) lglbacktrack (parent, 0);
-  (void) lglbcp (parent);
-  lglgc (parent);
-  child = lglminit (parent->mem->state,
-                    parent->mem->alloc,
-                    parent->mem->realloc,
-                    parent->mem->dealloc);
-  child->parent = parent;
-  memcpy (child->opts, parent->opts, sizeof *parent->opts);
-  lglcopyclonenfork (child, parent);
-  lglictrav (parent, 1, child, lglforkadd);
-  assert (parent->stats->irr.clauses.cur == child->stats->irr.clauses.cur);
-  parent->forked++;
-  assert (parent->forked > 0);
-  lglprt (parent, 1, "forked-%d", parent->forked);
-  return child;
 }
 
 static void lglflass (LGL * lgl, LGL * from) {
