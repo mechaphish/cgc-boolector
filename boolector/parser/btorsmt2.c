@@ -307,9 +307,10 @@ typedef struct BtorSMT2Parser
   int binding, expecting_let_body;
   char *error;
   unsigned char cc[256];
-  FILE *infile;
   char *infile_name;
-  FILE *outfile;
+  const char *smt_stmt;
+  unsigned long long cur_byte;
+  unsigned long long smt_stmt_len;
   BtorCharStack *prefix, token;
   BoolectorNodePtrStack outputs, inputs;
   BtorUIntStack outputs_trail, inputs_trail;
@@ -464,7 +465,14 @@ btor_nextch_smt2 (BtorSMT2Parser * parser)
   else if (parser->prefix &&
            parser->nprefix < BTOR_COUNT_STACK (*parser->prefix))
     res = parser->prefix->start[parser->nprefix++];
-  else res = getc (parser->infile);
+  else {
+      if (parser->cur_byte == parser->smt_stmt_len)
+         res = EOF;
+      else {
+         res = *((char *)(parser->smt_stmt + parser->cur_byte));
+         parser->cur_byte++;
+      }
+  }
   if (res == '\n')
     {
       parser->nextcoo.x++;
@@ -3558,19 +3566,12 @@ btor_set_option_smt2 (BtorSMT2Parser * parser)
   /* parser specific options */
   if (tag == BTOR_REGULAR_OUTPUT_CHANNEL_TAG_SMT2)
     {
-      assert (parser->outfile != stdin);
-      if (parser->outfile != stdout && parser->outfile != stderr)
-        fclose (parser->outfile);
       tag = btor_read_token_smt2 (parser);
       if (tag == BTOR_INVALID_TAG_SMT2)
         {
           assert (parser->error);
           return 0;
         }
-      parser->outfile = fopen (parser->token.start, "w");
-      if (!parser->outfile)
-        return !btor_perr_smt2 (
-            parser, "can not create '%s'", parser->token.start);
     }
   else if (tag == BTOR_PRINT_SUCCESS_TAG_SMT2)
     {
@@ -3695,8 +3696,6 @@ static void
 print_success (BtorSMT2Parser * parser)
 {
   if (!parser->print_success) return;
-  fprintf (parser->outfile, "success\n");
-  fflush (parser->outfile);
 }
 
 static int
@@ -3820,12 +3819,11 @@ btor_read_command_smt2 (BtorSMT2Parser * parser)
 #endif
             parser->res->result = boolector_sat (parser->btor);
             if (parser->res->result == BOOLECTOR_SAT)
-              fprintf (parser->outfile, "sat\n");
+              ;
             else if (parser->res->result == BOOLECTOR_UNSAT)
-              fprintf (parser->outfile, "unsat\n");
+              ;
             else
-              fprintf (parser->outfile, "unknown\n");
-            fflush (parser->outfile);
+              ;
           }
         else
           {
@@ -3892,8 +3890,7 @@ btor_read_command_smt2 (BtorSMT2Parser * parser)
         if (!boolector_get_opt_val (parser->btor, "model_gen"))
           return !btor_perr_smt2 (parser, "model generation is not enabled");
         if (parser->res->result != BOOLECTOR_SAT) break;
-        boolector_print_model (parser->btor, "smt2", parser->outfile);
-        fflush (parser->outfile);
+        //boolector_print_model (parser->btor, "smt2", parser->outfile);
         break;
 
       case BTOR_GET_VALUE_TAG_SMT2:
@@ -3908,9 +3905,8 @@ btor_read_command_smt2 (BtorSMT2Parser * parser)
             BTOR_RELEASE_STACK (parser->mem, tokens);
             return 0;
           }
-        fprintf (parser->outfile, "(");
-        boolector_print_value (
-            parser->btor, exp, tokens.start, "smt2", parser->outfile);
+        //boolector_print_value (
+        //    parser->btor, exp, tokens.start, "smt2", parser->outfile);
         BTOR_RESET_STACK (tokens);
         boolector_release (parser->btor, exp);
         tag = btor_read_token_smt2 (parser);
@@ -3922,15 +3918,13 @@ btor_read_command_smt2 (BtorSMT2Parser * parser)
                 BTOR_RELEASE_STACK (parser->mem, tokens);
                 return 0;
               }
-            fprintf (parser->outfile, "\n ");
-            boolector_print_value (
-                parser->btor, exp, tokens.start, "smt2", parser->outfile);
+            //fprintf (parser->outfile, "\n ");
+            //boolector_print_value (
+            //    parser->btor, exp, tokens.start, "smt2", parser->outfile);
             BTOR_RESET_STACK (tokens);
             boolector_release (parser->btor, exp);
             tag = btor_read_token_smt2 (parser);
           }
-        fprintf (parser->outfile, ")\n");
-        fflush (parser->outfile);
         if (tag != BTOR_RPAR_TAG_SMT2)
           {
             BTOR_RELEASE_STACK (parser->mem, tokens);
@@ -4003,9 +3997,7 @@ btor_read_command_smt2 (BtorSMT2Parser * parser)
 static const char *
 btor_parse_smt2_parser (BtorSMT2Parser * parser,
                         BtorCharStack * prefix,
-                        FILE * infile,
-                        const char * infile_name,
-                        FILE * outfile,
+                        const char * smt_stmt,
                         BtorParseResult * res)
 {
   double start = btor_time_stamp (), delta;
@@ -4014,9 +4006,16 @@ btor_parse_smt2_parser (BtorSMT2Parser * parser,
   parser->prefix = prefix;
   parser->nextcoo.x = 1;
   parser->nextcoo.y = 1;
-  parser->infile = infile;
-  parser->infile_name = btor_strdup (parser->mem, infile_name);
-  parser->outfile = outfile;
+
+  parser->infile_name = malloc(strlen("[smt_stmt]") + 1);
+  if (!parser->infile_name) {
+      exit(1);
+  }
+  strcpy(parser->infile_name, "[smt_stmt]");
+
+  parser->cur_byte = 0;
+  parser->smt_stmt = smt_stmt;
+  parser->smt_stmt_len = strlen(smt_stmt);
   parser->saved = 0;
   BTOR_CLR (res);
   parser->res = res;

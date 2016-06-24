@@ -12,8 +12,6 @@
  */
 
 #include "btorparse.h"
-#include "parser/btorbtor.h"
-#include "parser/btorsmt.h"
 #include "parser/btorsmt2.h"
 #include "boolector.h"
 #include "btorcore.h"

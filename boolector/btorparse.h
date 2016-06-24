@@ -33,7 +33,7 @@ typedef BtorParser * (*BtorInitParser)(Btor *, BtorParseOpt *);
 typedef void (*BtorResetParser)(void*);
 
 typedef char * (*BtorParse) (BtorParser *, BtorCharStack * prefix,
-                             FILE *, const char *, FILE *, BtorParseResult *);
+                             const char *, BtorParseResult *);
 
 
 enum BtorParseMode
