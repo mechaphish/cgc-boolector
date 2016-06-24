@@ -18,14 +18,12 @@ targets: liblgl.a
 analyze:
 	clang --analyze $(CFLAGS) $(shell ls *.c *.h)
 
-liblgl.a: lglib.o lglbnr.o lgldimacs.o lglopts.o makefile
-	ar rc $@ lglib.o lglbnr.o lgldimacs.o lglopts.o
+liblgl.a: lglib.o lglbnr.o lglopts.o makefile
+	ar rc $@ lglib.o lglbnr.o lglopts.o
 	ranlib $@
 
 lglib.o: lglib.c lglib.h lglconst.h lgloptl.h lglopts.h makefile $(HDEPS)
 	$(CC) $(CFLAGS) -c lglib.c
-lgldimacs.o: lgldimacs.c lgldimacs.h makefile
-	$(CC) $(CFLAGS) -c lgldimacs.c
 lglbnr.o: lglbnr.c lglcfg.h lglcflags.h makefile
 	$(CC) $(CFLAGS) -c lglbnr.c
 lglopts.o: lglopts.c lglopts.h lglconst.h lgloptl.h makefile
