@@ -29,7 +29,7 @@ lglbnr.o: lglbnr.c lglcfg.h lglcflags.h makefile
 lglopts.o: lglopts.c lglopts.h lglconst.h lgloptl.h makefile
 	$(CC) $(CFLAGS) -c lglopts.c
 
-lglcfg.h: VERSION mkconfig.sh lglbnr.c lglib.c lglmain.c lglcflags.h makefile
+lglcfg.h: VERSION mkconfig.sh lglbnr.c lglib.c lglcflags.h makefile
 	rm -f $@
 	./mkconfig.sh > $@
 lglcflags.h: makefile

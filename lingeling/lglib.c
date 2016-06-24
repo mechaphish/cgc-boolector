@@ -1273,12 +1273,7 @@ static void lglogstart (LGL * lgl, int level, const char * msg, ...) {
 /*------------------------------------------------------------------------*/
 
 double lglprocesstime (void) {
-  struct rusage u;
-  double res;
-  if (getrusage (RUSAGE_SELF, &u)) return 0;
-  res = u.ru_utime.tv_sec + 1e-6 * u.ru_utime.tv_usec;
-  res += u.ru_stime.tv_sec + 1e-6 * u.ru_stime.tv_usec;
-  return res;
+  return 0;
 }
 
 static double lglgetime (LGL * lgl) {
