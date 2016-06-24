@@ -1,0 +1,67 @@
+.SUFFIXES: .o .c .cc
+
+MAKEFLAGS=-j $(if $(CORES),$(CORES),1)
+CC=@CC@
+CXX=@CXX@
+INCS=-I. @INCS@
+CFLAGS=@CFLAGS@
+OBJS=@OBJS@
+LIBS=@LIBS@
+LDEPS=@LDEPS@
+VERSION=$(shell cat VERSION)
+SRCDIRS=@SRCDIRS@
+LIBOBJ=$(patsubst %.c,%.o,$(foreach d,$(SRCDIRS),$(wildcard $(d)/btor[a-z]*.c)))
+LIBOBJ+=boolector.o $(OBJS)
+SRC=$(foreach d,$(SRCDIRS),$(wildcard $(d)/*.[c|h|cc]))
+TARGETS=@TARGETS@
+ROOT=$(shell pwd|sed -e 's, ,\\ ,g')
+
+all: libboolector.a $(TARGETS)
+
+-include dependencies
+-include test.mk
+-include mbt.mk
+-include python.mk
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
+
+%.o: %.cc
+	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
+
+analyze:
+	clang --analyze $(CFLAGS) $(INCS) \
+	  $(shell find $(SRCDIRS) -maxdepth 1 -name "*.[ch]" -o -name "*.cc")
+
+dependencies: btorconfig.h $(SRC) makefile
+	rm -f $@
+	for srcdir in $(SRCDIRS); \
+	do \
+	  find $$srcdir/ -maxdepth 1 -name "*.[ch]" -o -name \*.cc | \
+	  xargs $(CC) $(CFLAGS) $(INCS) -MM | \
+	  sed -e 's,\(.*\):,'$$srcdir/'\1: makefile,' >>$@; \
+	done
+boolector: boolectormain.o libboolector.a $(LDEPS)
+	$(CC) $(CFLAGS) $(INCS) -o $@ boolectormain.o -L. -lboolector $(LIBS) $(LDEPS)
+
+libboolector.a: $(LIBOBJ)
+	rm -f $@
+	ar rc $@ $(LIBOBJ)
+	ranlib $@
+
+btorconfig.h: makefile VERSION mkconfig
+	rm -f $@; ./mkconfig > $@
+
+SONAME=-Xlinker -soname -Xlinker libboolector.so
+SHOBJS=$(filter-out ./btormbt.o ./btoruntrace.o ./btormain, $(LIBOBJ))
+libboolector.so: $(SHOBJS)
+	$(CC) $(CFLAGS) -shared -o $@ $(SHOBJS) $(LIBS) $(SONAME)
+
+clean:
+	rm -f $(TARGETS)
+	rm -f dependencies makefile btorconfig.h
+	rm -f $(foreach d,$(SRCDIRS),$(d)/*.{o,gcda,gcno,gcov,plist})
+	rm -f log/*.log *.tmp
+	rm -f *.a *.so $(foreach d,$(SRCDIRS),$(d)/*.o)
+
+.PHONY: all analyze clean
