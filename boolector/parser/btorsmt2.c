@@ -3818,12 +3818,14 @@ btor_read_command_smt2 (BtorSMT2Parser * parser)
             else
 #endif
             parser->res->result = boolector_sat (parser->btor);
+            /*
             if (parser->res->result == BOOLECTOR_SAT)
               ;
             else if (parser->res->result == BOOLECTOR_UNSAT)
               ;
             else
               ;
+            */
           }
         else
           {
