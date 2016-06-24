@@ -16,7 +16,7 @@ SRC=$(foreach d,$(SRCDIRS),$(wildcard $(d)/*.[c|h|cc]))
 TARGETS=@TARGETS@
 ROOT=$(shell pwd|sed -e 's, ,\\ ,g')
 
-all: libboolector.a $(TARGETS)
+all: libboolector.a
 
 -include dependencies
 -include test.mk
@@ -41,8 +41,6 @@ dependencies: btorconfig.h $(SRC) makefile
 	  xargs $(CC) $(CFLAGS) $(INCS) -MM | \
 	  sed -e 's,\(.*\):,'$$srcdir/'\1: makefile,' >>$@; \
 	done
-boolector: boolectormain.o libboolector.a $(LDEPS)
-	$(CC) $(CFLAGS) $(INCS) -o $@ boolectormain.o -L. -lboolector $(LIBS) $(LDEPS)
 
 libboolector.a: $(LIBOBJ)
 	rm -f $@
