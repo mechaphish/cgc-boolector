@@ -78,32 +78,9 @@ struct BtorParserAPI
 };
 
 int btor_parse (Btor * btor, 
-                FILE * infile, 
-                const char * infile_name, 
-                FILE * outfile,
+                const char * smt_stmt,
                 char ** error_msg,
                 int * status);
-
-int btor_parse_btor (Btor * btor, 
-                     FILE * infile, 
-                     const char * infile_name, 
-                     FILE * outfile,
-                     char ** error_msg, 
-                     int * status);
-
-int btor_parse_smt1 (Btor * btor, 
-                     FILE * infile, 
-                     const char * infile_name, 
-                     FILE * outfile,
-                     char ** error_msg,
-                     int * status);
-
-int btor_parse_smt2 (Btor * btor, 
-                     FILE * infile, 
-                     const char * infile_name, 
-                     FILE * outfile,
-                     char ** error_msg,
-                     int * status);
 
 BtorMsg * boolector_get_btor_msg (Btor * btor);
 #endif

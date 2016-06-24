@@ -2033,69 +2033,9 @@ int boolector_is_equal_sort (Btor * btor, BoolectorNode * n0,
   :return: In the incremental case (right now `SMT-LIB v1`_ only) the function returns either BOOLECTOR_SAT, BOOLECTOR_UNSAT or BOOLECTOR_UNKNOWN, otherwise it always returns BOOLECTOR_UNKNOWN. If a parse error occurs the function returns BOOLECTOR_PARSE_ERROR.
 */
 int boolector_parse (Btor * btor, 
-                     FILE * infile, 
-                     const char * infile_name, 
-                     FILE * outfile, 
+                     const char * smt_stmt,
                      char ** error_msg,
                      int * status);
-
-/*!
-  Parse input file in BTOR format.
- 
-  See boolector_parse.
-  
-  :param btor: Boolector instance.
-  :param infile: Input file.
-  :param infile_name: Input file name.
-  :param outfile: Output file.
-  :param error_msg: Error message.
-  :param status: Status of the input formula.
-  :return: BOOLECTOR_UNKNOWN or BOOLECTOR_PARSE_ERROR if a parse error occurred.
-*/
-int boolector_parse_btor (Btor * btor,
-                          FILE * infile, 
-                          const char * infile_name, 
-                          FILE * outfile, 
-                          char ** error_msg,
-                          int * status);
-
-/*!
-  Parse input file in `SMT-LIB v1`_ format.
- 
-  See boolector_parse.
-  
-  :param btor: Boolector instance.
-  :param infile: Input file.
-  :param infile_name: Input file name.
-  :param outfile: Input file.
-  :param error_msg: Error message.
-  :param status: Status of the input formula.
-  :return: In the incremental case (right now `SMT-LIB v1`_ only) the function returns either BOOLECTOR_SAT, BOOLECTOR_UNSAT or BOOLECTOR_UNKNOWN, otherwise it always returns BOOLECTOR_UNKNOWN. If a parse error occurs the function returns BOOLECTOR_PARSE_ERROR.
-*/
-int boolector_parse_smt1 (Btor * btor, 
-                          FILE * infile, 
-                          const char * infile_name, 
-                          FILE * outfile,
-                          char ** error_msg,
-                          int * status);
-
-/*!
-  Parse input file in `SMT-LIB v2`_ format. See boolector_parse.
- 
-  :param btor: Boolector instance.
-  :param infile: Input file.
-  :param infile_name: Input file name.
-  :param outfile: Output file.
-  :param error_msg: Error message.
-  :param status: Status of the input formula.
-  :return: BOOLECTOR_UNKNOWN or BOOLECTOR_PARSE_ERROR if a parse error occurred.
-*/
-int boolector_parse_smt2 (Btor * btor, 
-                          FILE * infile, 
-                          const char * infile_name, 
-                          FILE * outfile,
-                          char ** error_msg,
-                          int * status);
 
 /*------------------------------------------------------------------------*/
 
