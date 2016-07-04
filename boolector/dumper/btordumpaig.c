@@ -371,12 +371,12 @@ btor_dump_seq_aiger (BtorAIGMgr * amgr,
                   ch = tmp & 0x7f;
                   ch |= 0x80;
 
-                  putc (ch, file);
+                  //putc (ch, file);
                   tmp >>= 7;
                 }
 
               ch = tmp;
-              putc (ch, file);
+              //putc (ch, file);
             }
         }
       else

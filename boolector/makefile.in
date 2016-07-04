@@ -1,7 +1,7 @@
 .SUFFIXES: .o .c .cc
 
 MAKEFLAGS=-j $(if $(CORES),$(CORES),1)
-CC=@CC@
+CC=../../compile.sh
 CXX=@CXX@
 INCS=-I. @INCS@
 CFLAGS=@CFLAGS@

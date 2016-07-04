@@ -78,27 +78,6 @@ btor_num_digits_util (int x)
   return result;
 }
 
-#ifdef BTOR_HAVE_GETRUSAGE
-
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <unistd.h>
-
-double
-btor_time_stamp (void)
-{
-  double res = -1;
-  struct rusage u;
-  res = 0;
-  if (!getrusage (RUSAGE_SELF, &u))
-    {
-      res += u.ru_utime.tv_sec + 1e-6 * u.ru_utime.tv_usec;
-      res += u.ru_stime.tv_sec + 1e-6 * u.ru_stime.tv_usec;
-    }
-  return res;
-}
-#endif
-
 #ifdef BTOR_HAVE_STAT
 #include <sys/types.h>
 #include <sys/stat.h>
