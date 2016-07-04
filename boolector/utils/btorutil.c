@@ -78,6 +78,13 @@ btor_num_digits_util (int x)
   return result;
 }
 
+double
+btor_time_stamp (void)
+{
+  double res = -1; 
+  return res;
+}
+
 #ifdef BTOR_HAVE_STAT
 #include <sys/types.h>
 #include <sys/stat.h>
