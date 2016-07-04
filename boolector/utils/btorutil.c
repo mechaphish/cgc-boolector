@@ -99,8 +99,6 @@ btor_time_stamp (void)
 }
 #endif
 
-#define BTOR_HAVE_STAT
-
 #ifdef BTOR_HAVE_STAT
 #include <sys/types.h>
 #include <sys/stat.h>
