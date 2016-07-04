@@ -44,8 +44,7 @@ dependencies: btorconfig.h $(SRC) makefile
 
 libboolector.a: $(LIBOBJ)
 	rm -f $@
-	ar rc $@ $(LIBOBJ)
-	ranlib $@
+	../../bin/ar rcs $@ $(LIBOBJ)
 
 btorconfig.h: makefile VERSION mkconfig
 	rm -f $@; ./mkconfig > $@
